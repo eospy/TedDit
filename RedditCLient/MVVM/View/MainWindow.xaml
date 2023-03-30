@@ -60,12 +60,48 @@
                              ></RadioButton>
             </StackPanel>
             <Grid Grid.Column="1">
-                <TextBox Width="250"
+                <TextBox Width="200"
+                         x:Name="SearchBox"
                         Height="40"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Left"
                         Margin="5"
-                        Style="{StaticResource SearchBox}" />
+                        Style="{StaticResource SearchTheme}" />
+                <Button Content="🔍" 
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="200,15,0,0"
+                Width="40"
+                Height="40"
+                FontSize="20"
+                BorderThickness="0"
+                Foreground="DarkSlateBlue"
+                Background="Transparent"
+                Command="{Binding SearchButtonCommand}">
+                    
+                </Button>
+
+                <Popup x:Name="SearchPopup"
+               PlacementTarget="{Binding ElementName=SearchBox}"
+               Placement="Bottom"
+               Margin="0,40,0,0"
+               Width="200"
+               Height="200"
+               IsOpen="{Binding PopupIsOpen}"
+               AllowsTransparency="True"
+               >
+                    <ListView Background="Gray"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ScrollViewer.CanContentScroll="True"
+                      SelectedValue="{Binding SelectedSubreddit}"
+                      ItemsSource="{Binding SearchResults}"
+                      Style="{StaticResource SearchResultsTheme}">
+                        
+                    </ListView>
+
+                </Popup>
+
                 <Border Margin="10"
                            Background="Transparent"
                            HorizontalAlignment="Right"

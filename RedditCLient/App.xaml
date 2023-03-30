@@ -11,6 +11,8 @@
                 <ResourceDictionary Source="Theme/MenuButtonTheme.xaml"></ResourceDictionary>
                 <ResourceDictionary Source="Theme/SearchBoxTheme.xaml"></ResourceDictionary>
                 <ResourceDictionary Source="Theme/ListViewTheme.xaml"></ResourceDictionary>
+                <ResourceDictionary Source="Theme/SearchTheme.xaml"></ResourceDictionary>
+                <ResourceDictionary Source="Theme/SearchResultsTheme.xaml"></ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
             <DataTemplate DataType="{x:Type viewModel:HotViewModel}">
                 <view:FeedView/>

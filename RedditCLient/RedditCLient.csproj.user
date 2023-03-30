@@ -27,5 +27,11 @@
     <Page Update="Theme\SearchBoxTheme.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Theme\SearchResultsTheme.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Theme\SearchTheme.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 </Project>

@@ -19,11 +19,11 @@ namespace RedditCLient.MVVM.View
     /// <summary>
     /// Логика взаимодействия для FeedView.xaml
     /// </summary>
-    public partial class FeedView : UserControl
+    public partial class FeedView : Window
     {
         public FeedView()
         {
-            HotViewModel feedViewModel= new HotViewModel();
+            HotViewModel feedViewModel= new();
             DataContext= feedViewModel;
             InitializeComponent();
         }

@@ -12,8 +12,7 @@ namespace RedditCLient
     {
         public MainWindow()
         {
-            var mainwindowmodel = new MainWindowModel();
-            DataContext= mainwindowmodel;
+            
             InitializeComponent();
         }
         private void Mouse_move(object sender, MouseButtonEventArgs e)
