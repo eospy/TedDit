@@ -12,6 +12,9 @@ using Newtonsoft.Json;
 using System.Linq;
 using System.Diagnostics.Metrics;
 using RedditCLient.MVVM.Model;
+using System.Diagnostics;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace RedditCLient.MVVM.ViewModel
 {
@@ -28,16 +31,21 @@ namespace RedditCLient.MVVM.ViewModel
         public RelayCommand LoadPrevPageCommand { get; set; }
         public RelayCommand SearchButtonCommand { get; set; }
         public RelayCommand SubredditSelectCommand { get; set; }
+        public RelayCommand AuthorizeCommand { get; set; }
 
         private string pagecounter;
         private int pagecount = 1;
         string category = "";
         public ObservableCollection<PostModel.Data1> Posts { get; set; }
         public ObservableCollection<SearchData.Data1> SearchResults { get; set; }
+        public ObservableCollection<UserSubsData.Data1> UserSubs { get; set; }
         private SearchData.Data1 _selectedSubreddit;
-        private string title;
-        private string description;
-
+        private UserSubsData.Data1 _selectedusersub;
+        private string _title;
+        private string _usersubstitle;
+        private string _description;
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        private static Random random = new Random();
         public string Icon { get; set; }
         public string Background { get; set; }
         public ObservableCollection<PostModel.Data1> Cachedhot { get; set; }
@@ -45,10 +53,16 @@ namespace RedditCLient.MVVM.ViewModel
         public ObservableCollection<PostModel.Data1> Cachedtop { get; set; }
         public ObservableCollection<PostModel.Data1> Curposts { get; set; }
         private RestClient _client;
+        LocalServer server;
         string baseurl = "https://www.reddit.com/";
         string oauthurl = "https://oauth.reddit.com/";
         private string subreddit = "cats";
+        private string secret = "Oif_vzUl172FuMjOYS1Keod0mXHrjQ";
+        const string _defgrant= "grant_type=https://oauth.reddit.com/grants/installed_client&device_id=DO_NOT_TRACK_THIS_DEVICE";
+        const string redirecturi = "http://127.0.0.1:8080/auth/";
         public string token;
+        private string _refreshToken = "";
+        public string state;
         public string NextPage { get; set; }
         public MainWindowModel()
         {
@@ -66,27 +80,60 @@ namespace RedditCLient.MVVM.ViewModel
             Posts = new ObservableCollection<PostModel.Data1>();
             Curposts = new ObservableCollection<PostModel.Data1>();
             SearchResults = new ObservableCollection<SearchData.Data1>();
+            UserSubs=new ObservableCollection<UserSubsData.Data1>();
             SearchButtonCommand = new RelayCommand(o => SearchButton());
+            AuthorizeCommand = new RelayCommand(o => AuthorizeButton());
             _selectedSubreddit = new SearchData.Data1();
+            _selectedusersub=new UserSubsData.Data1();
             PageNumber = "1";
+            state=GetRandomString();
             _client = new RestClient();
+            server = new LocalServer();
             GetToken();
             GetSubredditInfo();
             GetPostslist();
         }
-        public void GetToken()
+        public void RefreshToken()
         {
-            _client.Authenticator = new HttpBasicAuthenticator("m2wRkX8IpaY1u8v6oN7Baw", "Oif_vzUl172FuMjOYS1Keod0mXHrjQ");
+            GetToken("grant_type=refresh_token&refresh_token="+_refreshToken);
+        }
+        public void GetToken(string granttype=_defgrant)
+        {
+            string password = secret;
+            string username = "m2wRkX8IpaY1u8v6oN7Baw";
+            if (granttype != _defgrant)
+            {
+                username= "BF4HDny1XofDp2ZwrmOYbA";
+                password = "";
+            }
+            _client.Authenticator = new HttpBasicAuthenticator(username, password);
             var request = new RestRequest(baseurl + "api/v1/access_token", Method.Post);
             request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
             request.AddHeader("user-agent", "Teddit by eospy");
-            string body = "grant_type=https://oauth.reddit.com/grants/installed_client&device_id=DO_NOT_TRACK_THIS_DEVICE";
-            request.AddBody(body);
-            var response = _client.PostAsync(request);
-            var data = response.Result.Content;
+            request.AddBody(granttype);
+            var response = _client.Post(request);
+            var data = response.Content;
             var root = JsonConvert.DeserializeObject<Token.Rootobject>(data);
             token = root.access_token;
-
+            _refreshToken = root.refresh_token;
+        }
+        public void GetUserSubs()
+        {
+            string uri = oauthurl + "/subreddits/mine/subscriber";
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Get);
+            request.AddHeader("user-agent", "Teddit by eospy");
+            string response = "";
+            try
+            {
+                 response = _client.GetAsync(request).GetAwaiter().GetResult().Content;
+            }
+            catch(Exception) { }
+            var data = JsonConvert.DeserializeObject<UserSubsData.Rootobject>(response).data.children;
+            foreach (var sub in data)
+            {
+                UserSubs.Add(sub.data);
+            }
         }
         public void GetPostslist(string next = "", string prev = "")
         {
@@ -98,32 +145,33 @@ namespace RedditCLient.MVVM.ViewModel
             request.AddHeader("user-agent", "Teddit by eospy");
             request.AddParameter("after", next);
             request.AddParameter("before", prev);
+            RestResponse response = new RestResponse();
             try
             {
-                var response = _client.GetAsync(request).GetAwaiter().GetResult();
-                var root = JsonConvert.DeserializeObject<PostModel.Rootobject>(response.Content);
-                NextPage = root.data.after;
-                foreach (var post in root.data.children)
-                {
-                    Curposts.Add(post.data);
-                }
-                switch (category)
-                {
-                    case "new":
-                        Cachednew = Curposts; break;
-                    case "hot":
-                        Cachedhot = Curposts; break;
-                    case "top":
-                        Cachedtop = Curposts; break;
-
-                }
-                Posts = Curposts;
+                 response = _client.GetAsync(request).GetAwaiter().GetResult();
+               
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Subreddit loading problem");
             }
-            
+            var root = JsonConvert.DeserializeObject<PostModel.Rootobject>(response.Content);
+            NextPage = root.data.after;
+            foreach (var post in root.data.children)
+            {
+                Curposts.Add(post.data);
+            }
+            switch (category)
+            {
+                case "new":
+                    Cachednew = Curposts; break;
+                case "hot":
+                    Cachedhot = Curposts; break;
+                case "top":
+                    Cachedtop = Curposts; break;
+
+            }
+            Posts = Curposts;
         }
         public void GetSubredditInfo()
         {
@@ -131,15 +179,16 @@ namespace RedditCLient.MVVM.ViewModel
             _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
             var request = new RestRequest(uri, Method.Get);
             request.AddHeader("user-agent", "Teddit by eospy");
-            var response = _client.GetAsync(request).GetAwaiter().GetResult();
+            RestResponse response = new RestResponse();
             try
             {
-                var data = JsonConvert.DeserializeObject<SubredditData.Rootobject>(response.Content).data;
-                Title = data.title;
-                Description = data.public_description;
+                 response = _client.GetAsync(request).GetAwaiter().GetResult();
+                
             }
             catch (Exception) { }
-
+            var data = JsonConvert.DeserializeObject<SubredditData.Rootobject>(response.Content).data;
+            Title = data.title;
+            Description = data.public_description;
         }
         public void SearchSubreddits(string search)
         {
@@ -148,35 +197,60 @@ namespace RedditCLient.MVVM.ViewModel
             var request = new RestRequest(uri, Method.Get);
             request.AddHeader("user-agent", "Teddit by eospy");
             request.AddParameter("q", search);
-            var response = _client.GetAsync(request).GetAwaiter().GetResult();
+            RestResponse response = new RestResponse();
             try
             {
-                var root = JsonConvert.DeserializeObject<SearchData.Rootobject>(response.Content).data.children;
-                foreach (var subreddit in root)
-                {
-                    SearchResults.Add(subreddit.data);
-                }
+                response = _client.GetAsync(request).GetAwaiter().GetResult();
+                
             }
             catch(Exception) { MessageBox.Show("Subreddit search problem"); }
-           
+            var root = JsonConvert.DeserializeObject<SearchData.Rootobject>(response.Content).data.children;
+            foreach (var subreddit in root)
+            {
+                SearchResults.Add(subreddit.data);
+            }
+        }
+        public void GetComments(string postLink)
+        {
+            string uri = oauthurl + "/r/"+Subreddit+"/comments/" + postLink;
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Get);
+            request.AddHeader("user-agent", "Teddit by eospy");
+            var response = _client.Get(request).Content;
+            var data = Deserialize<CommentsData.Class1>(response);
+        }
+        public static List<T> Deserialize<T>(string SerializedJSONString)
+        {
+            var list = JsonConvert.DeserializeObject<List<T>>(SerializedJSONString);
+            return list;
         }
         public string Subreddit
         {
             get
             {
-                if (subreddit != "cats")
-                {
-                    return _selectedSubreddit.display_name;
-                }
-                else return subreddit;
+                return subreddit;
             }
             set
             {
                 subreddit = value;
-                
             }
         }
+        public UserSubsData.Data1 SelectedUserSub
+        {
+            get { return _selectedusersub; }
+            set
+            {
+                if (value != null)
+                {
+                    SetProperty(ref _selectedusersub, value);
+                    subreddit= _selectedusersub.display_name;
+                    Subreddit = subreddit;
+                    GetSubredditInfo();
+                    GetPostslist();
+                }
 
+            }
+        }
         public SearchData.Data1 SelectedSubreddit
         {
             get { return _selectedSubreddit; }
@@ -184,8 +258,9 @@ namespace RedditCLient.MVVM.ViewModel
             {
                 if (value != null) 
                 {
-                    SetProperty<SearchData.Data1>(ref _selectedSubreddit, value);
-                    Subreddit = _selectedSubreddit.display_name;
+                    SetProperty(ref _selectedSubreddit, value);
+                    subreddit= _selectedSubreddit.display_name;
+                    Subreddit = subreddit;
                     PopupIsOpen = false;
                     GetSubredditInfo();
                     GetPostslist();
@@ -205,19 +280,40 @@ namespace RedditCLient.MVVM.ViewModel
 
         public string Title
         {
-            get { return title; }
-            set { SetProperty<string>(ref title, value); } 
+            get { return _title; }
+            set { SetProperty<string>(ref _title, value); } 
         }
-        
+        public string UserSubsTitle
+        {
+            get { return _usersubstitle; }
+            set { SetProperty<string>(ref _usersubstitle, value); }
+        }
         public string Description 
         {
-            get { return description; }
-            set { SetProperty<string>(ref description, value); }
+            get { return _description; }
+            set { SetProperty<string>(ref _description, value); }
         }
         public string PageNumber
         {
             protected set { SetProperty<string>(ref pagecounter, value); }
             get { return pagecounter; }
+        }
+        void AuthorizeButton()
+        {
+            Process.Start(new ProcessStartInfo { FileName = @"https://www.reddit.com/api/v1/authorize?client_id=BF4HDny1XofDp2ZwrmOYbA&response_type=code&state=" 
+                + state + "&redirect_uri=" + 
+                redirecturi + "&duration=permanent&" +
+                "scope=mysubreddits submit save read vote identity",
+                UseShellExecute = true });
+            string code =server.Start(state);
+            string body = "grant_type=authorization_code&code=" + code + "&redirect_uri=" + redirecturi;
+            GetToken(body);
+            GetUserSubs();
+            UserSubsTitle = "Your communities";
+        }
+        private static string GetRandomString()
+        {
+            return new string(Enumerable.Repeat(chars, 21).Select(s => s[random.Next(s.Length)]).ToArray());
         }
         void LoadNextPage()
         {

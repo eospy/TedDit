@@ -58,6 +58,26 @@
                              Style="{StaticResource MenuButtonTheme}"
                               Command="{Binding TopCategoryCommand}"
                              ></RadioButton>
+
+                <TextBlock Text="{Binding UserSubsTitle}"
+                           Foreground="DarkSlateBlue"
+                       FontSize="16"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left"
+                       Margin="20,0,0,0">
+                    
+                </TextBlock>
+                <ListView Foreground="White"
+                          Background="Transparent"
+                          ItemsSource="{Binding UserSubs}"
+                          SelectedValue="{Binding SelectedUserSub}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          ScrollViewer.CanContentScroll="False"
+                          Style="{StaticResource UserSubsStyle}"
+                          >
+                    
+                </ListView>
+               
             </StackPanel>
             <Grid Grid.Column="1">
                 <TextBox Width="200"
@@ -81,8 +101,9 @@
                 Command="{Binding SearchButtonCommand}">
                     
                 </Button>
+                
 
-                <Popup x:Name="SearchPopup"
+               <Popup x:Name="SearchPopup"
                PlacementTarget="{Binding ElementName=SearchBox}"
                Placement="Bottom"
                Margin="0,40,0,0"
@@ -178,6 +199,17 @@
                          HorizontalAlignment="Right"
                          VerticalAlignment="Bottom"
                          Margin="0,0,0,10">
+                <Button Width="80"
+                        Height="40"
+                        Content="Authorize app"
+                        Foreground="DarkSlateBlue"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        Command="{Binding AuthorizeCommand}">
+
+                </Button>
                 <Button 
                 Content="←"
                 Width="30"

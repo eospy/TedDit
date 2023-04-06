@@ -7,15 +7,7 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="MVVM\View\HotView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="MVVM\View\MainWindow.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="MVVM\View\HotView.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Theme\ListViewTheme.xaml">
@@ -31,6 +23,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Theme\SearchTheme.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Theme\UserSubsStyleTheme.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\App.xaml
-71271145106
+7809810853
 1-1614960578
-14-419604956
+15-797235528
 1961748572826
-MVVM\View\HotView.xaml;MVVM\View\MainWindow.xaml;Theme\ListViewTheme.xaml;Theme\MenuButtonTheme.xaml;Theme\SearchBoxTheme.xaml;Theme\SearchResultsTheme.xaml;Theme\SearchTheme.xaml;
+MVVM\View\MainWindow.xaml;Theme\ListViewTheme.xaml;Theme\MenuButtonTheme.xaml;Theme\SearchBoxTheme.xaml;Theme\SearchResultsTheme.xaml;Theme\SearchTheme.xaml;Theme\UserSubsStyleTheme.xaml;
 
-False
+True
 
