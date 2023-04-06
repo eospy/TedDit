@@ -2,6 +2,7 @@
 Reddit client for Windows using WPF Framework.
 
 Features:
+
 Version 0.1.
 1. Search for subreddit
 2. View posts (not interactive yet)
