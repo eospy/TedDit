@@ -13,3 +13,7 @@ Version 0.2.
 1. Fixed search
 2. Built in server for application only authentification.
 3. Accessing user data for quick access to user subreddits and so on. 
+
+Version 0.3.
+1. Added comments (nested comments not supported yet)
+2. Added subscribe function
