@@ -26,13 +26,11 @@
                 <RowDefinition Height="75"></RowDefinition>
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
-            <TextBlock Text="TedDit"
-                       Foreground="DarkSlateBlue"
-                       FontSize="22"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Left"
-                       Margin="20,0,0,0"
-                       ></TextBlock>
+            
+            <Image Source="/images/icon.png"
+                   HorizontalAlignment="Left"
+                   Margin="10,0,0,0"
+                   Height="45" ></Image>
             <StackPanel Grid.Row="1">
                 <RadioButton Content="Hot"
                              Height="50"
@@ -72,8 +70,9 @@
                           ItemsSource="{Binding UserSubs}"
                           SelectedValue="{Binding SelectedUserSub}"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                          ScrollViewer.CanContentScroll="False"
-                          Style="{StaticResource UserSubsStyle}"
+                          ScrollViewer.CanContentScroll="True"
+                          Height="200"
+                          Style="{StaticResource UserSubsStyle}" 
                           >
                     
                 </ListView>
@@ -96,7 +95,7 @@
                 Height="40"
                 FontSize="20"
                 BorderThickness="0"
-                Foreground="DarkSlateBlue"
+                Foreground="#586c7d"
                 Background="Transparent"
                 Command="{Binding SearchButtonCommand}">
                     
@@ -135,7 +134,7 @@
                                 Height="30"
                                 FontSize="20"
                                 BorderThickness="0"
-                                Foreground="DarkSlateBlue"
+                                Foreground="#586c7d"
                                 Background="Transparent"
                                 Margin="0,0,0,3"
                                 Command="{Binding MinimizeButtonCommand}"
@@ -146,7 +145,7 @@
                             Height="30"
                             FontSize="20"
                             BorderThickness="0"
-                            Foreground="DarkSlateBlue"
+                            Foreground="#586c7d"
                             Background="Transparent"
                             Command="{Binding MaximixeButtonCommand}"
                            >
@@ -156,7 +155,7 @@
                             Height="30"
                             FontSize="20"
                             BorderThickness="0"
-                            Foreground="DarkSlateBlue"
+                            Foreground="#586c7d"
                             Background="Transparent"
                             Command="{Binding CloseWindowCommand}"
                             >
@@ -167,12 +166,21 @@
             <StackPanel Grid.Row="1"
                         Grid.Column="1" 
                         Margin="10,0,10,0">
-                
-                <TextBlock Text="{Binding Title}"
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding Title}"
                            Foreground="White"
-                           HorizontalAlignment="Center"
                            FontSize="20"
                            FontFamily="Verdana"></TextBlock>
+                    <Button Content="{Binding SubscribeButtonText}"
+                            Background="Transparent"
+                            Foreground="#586c7d"
+                            BorderThickness="0"
+                            Margin="20,0,0,0"
+                            IsEnabled="{Binding SubscribeButtonIsOpen }"
+                            Command="{Binding SubscribeCommand}"></Button>
+                </StackPanel>
+                   
                 <TextBlock Text="{Binding Description}"
                            Foreground="White"
                            TextWrapping="Wrap"
@@ -182,17 +190,44 @@
                            Height="40"></TextBlock>
 
             </StackPanel>
-            <ListView Background="Transparent"
+            <ListView x:Name="ListView"
+                      Background="Transparent"
                       Grid.Row="1"
                       Grid.Column="1"
                       Margin="10,60,10,0"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ScrollViewer.CanContentScroll="False"
                       ItemsSource="{Binding Posts}"
+                      SelectedItem="{Binding SelectedPost}"
                       Style="{StaticResource ListStyle}">
-               
+             
 
             </ListView>
+            <Popup  x:Name="CommentsPopup"
+                    PlacementTarget="{Binding ElementName=ListView}"
+                    IsOpen="{Binding CommentsIsOpen}"
+                    Placement="RelativePoint"                    
+                    Width="700"
+                    Height="465"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Button Grid.Row="0" Content="Close" Command="{Binding CloseCommentsCommand}"></Button>
+                    <ListView Grid.Row="1"  ItemsSource="{Binding Comments}"
+                          Style="{StaticResource CommentsStyle}">
+
+                    </ListView>
+                </Grid>
+
+
+
+
+            </Popup>
             <StackPanel  Grid.Row="1"
                          Grid.Column="0"
                          Orientation="Horizontal"
@@ -202,7 +237,7 @@
                 <Button Width="80"
                         Height="40"
                         Content="Authorize app"
-                        Foreground="DarkSlateBlue"
+                        Foreground="#586c7d"
                         Background="Transparent"
                         BorderThickness="0"
                         HorizontalAlignment="Left"

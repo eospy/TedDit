@@ -8,11 +8,11 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Theme/MenuButtonTheme.xaml"></ResourceDictionary>
-                <ResourceDictionary Source="Theme/SearchBoxTheme.xaml"></ResourceDictionary>
                 <ResourceDictionary Source="Theme/ListViewTheme.xaml"></ResourceDictionary>
                 <ResourceDictionary Source="Theme/SearchTheme.xaml"></ResourceDictionary>
                 <ResourceDictionary Source="Theme/SearchResultsTheme.xaml"></ResourceDictionary>
                 <ResourceDictionary Source="Theme/UserSubsStyleTheme.xaml"></ResourceDictionary>
+                <ResourceDictionary Source="Theme/CommentsStyleTheme.xaml"></ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
           
         </ResourceDictionary>

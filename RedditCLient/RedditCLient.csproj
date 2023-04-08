@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="ddd.ico" />
   </ItemGroup>
 
@@ -19,7 +23,10 @@
 
   <ItemGroup>
     <Folder Include="Fonts\" />
-    <Folder Include="Images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\icon.png" />
   </ItemGroup>
 
 </Project>

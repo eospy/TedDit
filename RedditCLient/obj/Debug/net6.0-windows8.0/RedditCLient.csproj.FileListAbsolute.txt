@@ -1,7 +1,6 @@
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient.csproj.AssemblyReference.cache
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\ListViewTheme.baml
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\MenuButtonTheme.baml
-C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\SearchBoxTheme.baml
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\SearchResultsTheme.baml
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\SearchTheme.baml
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\UserSubsStyleTheme.baml
@@ -31,3 +30,4 @@ C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\D
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient.pdb
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient.genruntimeconfig.cache
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\ref\RedditCLient.dll
+C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\CommentsStyleTheme.baml
