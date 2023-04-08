@@ -16,4 +16,4 @@ Version 0.2.
 
 Version 0.3.
 1. Added comments (nested comments not supported yet)
-2. Added subscribe function
+2. Added subscribe/unsubscribe function
