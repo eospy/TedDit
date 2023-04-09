@@ -26,8 +26,8 @@
 
         public class Child
         {
-            public string kind { get; set; }
-            public Data1 data { get; set; }
+            public string? kind { get; set; }
+            public Data1? data { get; set; }
         }
 
         public class Data1
@@ -161,17 +161,17 @@
 
         public class Media_Metadata
         {
-            public Apve77hgi3ra1 apve77hgi3ra1 { get; set; }
-            public Csy1khgii3ra1 csy1khgii3ra1 { get; set; }
+            public Apve77hgi3ra1? apve77hgi3ra1 { get; set; }
+            public Csy1khgii3ra1? csy1khgii3ra1 { get; set; }
         }
 
         public class Apve77hgi3ra1
         {
-            public string status { get; set; }
-            public string e { get; set; }
-            public string m { get; set; }
-            public P[] p { get; set; }
-            public S s { get; set; }
+            public string? status { get; set; }
+            public string? e { get; set; }
+            public string? m { get; set; }
+            public P[]? p { get; set; }
+            public S? s { get; set; }
             public string id { get; set; }
         }
 
@@ -186,31 +186,31 @@
         {
             public int? y { get; set; }
             public int? x { get; set; }
-            public string u { get; set; }
+            public string? u { get; set; }
         }
 
         public class Csy1khgii3ra1
         {
-            public string status { get; set; }
-            public string e { get; set; }
-            public string m { get; set; }
-            public P1[] p { get; set; }
-            public S1 s { get; set; }
-            public string id { get; set; }
+            public string? status { get; set; }
+            public string? e { get; set; }
+            public string? m { get; set; }
+            public P1[]? p { get; set; }
+            public S1? s { get; set; }
+            public string? id { get; set; }
         }
 
         public class S1
         {
             public int? y { get; set; }
             public int? x { get; set; }
-            public string u { get; set; }
+            public string? u { get; set; }
         }
 
         public class P1
         {
             public int? y { get; set; }
             public int? x { get; set; }
-            public string u { get; set; }
+            public string? u { get; set; }
         }
 
         public class Media_Embed
@@ -227,16 +227,16 @@
 
         public class Link_Flair_Richtext
         {
-            public string e { get; set; }
-            public string t { get; set; }
+            public string? e { get; set; }
+            public string? t { get; set; }
         }
 
         public class Author_Flair_Richtext
         {
-            public string a { get; set; }
-            public string u { get; set; }
-            public string e { get; set; }
-            public string t { get; set; }
+            public string? a { get; set; }
+            public string? u { get; set; }
+            public string? e { get; set; }
+            public string? t { get; set; }
         }
 
     }

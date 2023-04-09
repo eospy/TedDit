@@ -1,4 +1,6 @@
-﻿using System;
+﻿using RedditCLient.Core;
+using System;
+using System.Windows;
 
 namespace RedditCLient.API
 {
@@ -27,6 +29,21 @@ namespace RedditCLient.API
         }
         public class Data1
         {
+            public Data1()
+            {
+
+            }
+            public Data1(string subreddit_name_prefixed, string id, string subreddit, string title,string url_overridden_by_dest,string selftext,int score,int numcomments)
+            {
+                this.id = id;
+                this.title = title;
+                this.url_overridden_by_dest=url_overridden_by_dest;
+                this.selftext = selftext;
+                this.score = score;
+                this.subreddit=subreddit;
+                this.num_comments=numcomments;
+                this.subreddit_name_prefixed=subreddit_name_prefixed;
+            }
             public object? approved_at_utc { get; set; }
             public string? subreddit { get; set; }
             public string? selftext { get; set; }

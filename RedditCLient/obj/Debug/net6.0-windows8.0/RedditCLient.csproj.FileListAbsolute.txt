@@ -31,3 +31,4 @@ C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\D
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient.genruntimeconfig.cache
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\ref\RedditCLient.dll
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\CommentsStyleTheme.baml
+C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\UpvoteButtonTheme.baml

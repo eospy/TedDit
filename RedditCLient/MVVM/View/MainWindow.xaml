@@ -56,6 +56,13 @@
                              Style="{StaticResource MenuButtonTheme}"
                               Command="{Binding TopCategoryCommand}"
                              ></RadioButton>
+                <RadioButton Content="⌂Home"
+                             Height="50"
+                             Foreground="White"
+                             FontSize="18"
+                             Style="{StaticResource MenuButtonTheme}"
+                              Command="{Binding HomePageCommand}"
+                             ></RadioButton>
 
                 <TextBlock Text="{Binding UserSubsTitle}"
                            Foreground="DarkSlateBlue"
@@ -199,9 +206,94 @@
                       ScrollViewer.CanContentScroll="False"
                       ItemsSource="{Binding Posts}"
                       SelectedItem="{Binding SelectedPost}"
-                      Style="{StaticResource ListStyle}">
-             
+                      Style="{StaticResource ListStyle}"
+                      >
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="4" >
+                            <DockPanel.Style>
+                                <Style TargetType="DockPanel">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#303030"></Setter>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="False">
+                                            <Setter Property="Background" Value="Transparent"></Setter>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor,
+                                        AncestorType={x:Type ListBoxItem}},
+                                        Path=IsSelected}" Value="True">
+                                            <Setter Property="Background" Value="#303030"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DockPanel.Style>
+                            <StackPanel Margin="4,0,0,0" >
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding subreddit_name_prefixed}"
+                                            Foreground="White"
+                                           Background="#586c7d"
+                                           FontSize="12"
+                                           FontStyle="Normal"
+                                           Height="15"></TextBlock>
+                                <TextBlock Text="{Binding title}"
+                                   FontWeight="Bold" 
+                                   TextWrapping="Wrap"
+                                   Foreground="White"
+                                   FontSize="24"></TextBlock>
+                            </StackPanel>
+                            <Image Source="{Binding url_overridden_by_dest,TargetNullValue={x:Null}}" 
+                                   Margin="30" 
+                                   HorizontalAlignment="Left"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   MaxHeight="400"
+                                   >
+                            </Image>
+                            <TextBlock Text="{Binding selftext}"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxHeight="200"
+                                       FontWeight="Bold" 
+                                       TextWrapping="Wrap"
+                                       Foreground="White"
+                                       FontSize="14">
 
+                            </TextBlock>
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Left">
+
+                                <RadioButton Content="▲" 
+                                        FontSize="16"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding Path=DataContext.UpvoteCommand,RelativeSource=
+                                   {RelativeSource FindAncestor, 
+                                   AncestorType={x:Type ItemsControl}}}"
+                                        Style="{StaticResource UpvoteButton}"
+                                        >
+                                         
+                                    </RadioButton>
+                                <TextBlock Text="{Binding score}"
+                                           FontSize="16"
+                                           >
+
+                                </TextBlock>
+                                <RadioButton Content="▼ " 
+                                             FontSize="16"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                         Command="{Binding Path=DataContext.DownvoteCommand,RelativeSource=
+                                   {RelativeSource FindAncestor, 
+                                   AncestorType={x:Type ItemsControl}}}"
+                                          Style="{StaticResource UpvoteButton}">
+                                 
+                                </RadioButton>
+
+                            </StackPanel>
+
+                        </StackPanel>
+                        </DockPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
             </ListView>
             <Popup  x:Name="CommentsPopup"
                     PlacementTarget="{Binding ElementName=ListView}"

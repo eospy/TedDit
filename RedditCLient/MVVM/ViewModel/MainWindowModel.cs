@@ -36,6 +36,9 @@ namespace RedditCLient.MVVM.ViewModel
         public RelayCommand AuthorizeCommand { get; set; }
         public RelayCommand CloseCommentsCommand { get; set; }
         public RelayCommand SubscribeCommand { get; set; }
+        public RelayCommand HomePageCommand { get; set; }
+        public RelayCommand UpvoteCommand { get; set; }
+        public RelayCommand DownvoteCommand { get; set; }
         public ObservableCollection<PostModel.Data1> Posts { get; set; }
         public ObservableCollection<PostModel.Data1> Cachedhot { get; set; }
         public ObservableCollection<PostModel.Data1> Cachednew { get; set; }
@@ -53,6 +56,7 @@ namespace RedditCLient.MVVM.ViewModel
         private bool _popupIsOpen;
         private bool _commentsIsOpen;
         private bool _subscribeButtonIsOpen;
+        private bool authorized = false;
         private string pagecounter;
         private int pagecount = 1;
         string category = "";
@@ -92,6 +96,9 @@ namespace RedditCLient.MVVM.ViewModel
             AuthorizeCommand = new RelayCommand(o => AuthorizeButton());
             CloseCommentsCommand = new RelayCommand(o => CloseComments());
             SubscribeCommand=new RelayCommand(o=>Subscribe());
+            HomePageCommand = new RelayCommand(o => SetHomePage());
+            UpvoteCommand = new RelayCommand(o => Upvote()); ;
+            DownvoteCommand = new RelayCommand(o => Downvote()); ;
             Posts = new ObservableCollection<PostModel.Data1>();
             Curposts = new ObservableCollection<PostModel.Data1>();
             SearchResults = new ObservableCollection<SearchData.Data1>();
@@ -132,8 +139,77 @@ namespace RedditCLient.MVVM.ViewModel
             token = root.access_token;
             _refreshToken = root.refresh_token;
         }
+        void Upvote()
+        {
+            if (authorized &&_selectedPost.name!=null)
+            {
+                Vote(1);
+            }
+        }
+        void Downvote()
+        {
+            if (authorized && _selectedPost.name != null)
+            {
+                Vote(-1);
+            }
+        }
+        public void Vote(int vote)
+        {
+            string uri = oauthurl + "api/vote/";
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Post);
+            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+            request.AddHeader("user-agent", "Teddit by eospy");
+            request.AddParameter("dir", vote);
+            request.AddParameter("id", _selectedPost.name);
+            _client.Post(request);
+        }
+        void SetHomePage()
+        {
+            Subreddit = "HOME";
+            GetHomePage();
+        }
+        public void GetHomePage(string next = "", string prev = "")
+        {
+            Posts.Clear();
+            Curposts.Clear();
+            Title = "";
+            Description = "";
+            SubscribeButtonText = "";
+            string uri = oauthurl + "/" + category;
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Get);
+            request.AddHeader("user-agent", "Teddit by eospy");
+            request.AddParameter("after", next);
+            request.AddParameter("before", prev);
+            RestResponse response = new();
+            try
+            {
+                response = _client.GetAsync(request).GetAwaiter().GetResult();
+            }
+            catch (Exception) { MessageBox.Show("Subreddit loading problem"); }
+            var root = JsonConvert.DeserializeObject<HomePageData.Rootobject>(response.Content);
+            NextPage = root.data.after;
+            root.data.children.Select(r => r.data).ToList().ForEach(r => Curposts.Add(new PostModel.Data1(r.subreddit_name_prefixed, r.id,r.subreddit,r.title, r.url_overridden_by_dest, r.selftext, r.score,r.num_comments)));
+            switch (category)
+            {
+                case "new":
+                    Cachednew = Curposts; break;
+                case "hot":
+                    Cachedhot = Curposts; break;
+                case "top":
+                    Cachedtop = Curposts; break;
+
+            }
+            Posts = Curposts;
+        }
         public void GetPostslist(string next = "", string prev = "")
         {
+            if (Subreddit == "HOME")
+            {
+                GetHomePage(next,prev);
+                return;
+            }
             Posts.Clear();
             Curposts.Clear();
             string uri = oauthurl + "r/" + Subreddit + "/" + category;
@@ -182,7 +258,6 @@ namespace RedditCLient.MVVM.ViewModel
             catch (Exception) { }
             var root = JsonConvert.DeserializeObject<UserSubsData.Rootobject>(response).data.children;
             root.Select(r => r.data).ToList().ForEach(r => UserSubs.Add(r));
-            Console.WriteLine("d");
         }
         public void Subscribe()
         {
@@ -232,7 +307,7 @@ namespace RedditCLient.MVVM.ViewModel
         }
         public void GetComments(string postLink)
         {
-            string uri = oauthurl + "/r/" + Subreddit + "/comments/" + postLink;
+            string uri = oauthurl +"/comments/" + postLink;
             _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
             var request = new RestRequest(uri, Method.Get);
             request.AddHeader("user-agent", "Teddit by eospy");
@@ -260,7 +335,12 @@ namespace RedditCLient.MVVM.ViewModel
         public PostModel.Data1 SelectedPost
         {
             get { return _selectedPost; }
-            set { _selectedPost = value; if (_selectedPost != null && _selectedPost.num_comments > 0) OpenComments(); }
+            set
+            {
+                _selectedPost = value; 
+                if (_selectedPost != null && _selectedPost.num_comments > 0)
+                    OpenComments();
+            }
         }
         public UserSubsData.Data1 SelectedUserSub
         {
@@ -311,7 +391,7 @@ namespace RedditCLient.MVVM.ViewModel
             SearchSubreddits(subreddit);
             PopupIsOpen = true;
         }
-
+        
         public bool CommentsIsOpen
         {
             get => _commentsIsOpen;
@@ -370,9 +450,11 @@ namespace RedditCLient.MVVM.ViewModel
             UserSubsTitle = "Your communities";
             SubscribeButtonIsOpen= true;
             SubscribeButtonState(UserSubs.Any(s => s.display_name == Subreddit));
+            authorized = true;
         }
         void SubscribeButtonState(bool state)
         {
+            if(!SubscribeButtonIsOpen) return; 
             _subscribeButtonState=state;
             switch (state)
             {

@@ -25,6 +25,9 @@
     <Page Update="Theme\SearchTheme.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Theme\UpvoteButtonTheme.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Theme\UserSubsStyleTheme.xaml">
       <SubType>Designer</SubType>
     </Page>
