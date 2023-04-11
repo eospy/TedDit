@@ -1,5 +1,5 @@
 # TedDit
-Reddit client for Windows using WPF Framework.
+Reddit client for Windows written with WPF Framework.
 
 Features:
 
