@@ -32,12 +32,20 @@
                    Margin="10,0,0,0"
                    Height="45" ></Image>
             <StackPanel Grid.Row="1">
+                <RadioButton Content="⌂Home"
+                             Height="50"
+                             Foreground="White"
+                             FontSize="18"
+                             IsChecked="True"
+                             Style="{StaticResource MenuButtonTheme}"
+                              Command="{Binding HomePageCommand}"
+                             ></RadioButton>
                 <RadioButton Content="Hot"
                              Height="50"
                              FontSize="20"
                              Foreground="White"
                              Style="{StaticResource MenuButtonTheme}"
-                             IsChecked="True"
+                             
                              Command="{Binding HotCategoryCommand}"
                              ></RadioButton>
 
@@ -56,13 +64,7 @@
                              Style="{StaticResource MenuButtonTheme}"
                               Command="{Binding TopCategoryCommand}"
                              ></RadioButton>
-                <RadioButton Content="⌂Home"
-                             Height="50"
-                             Foreground="White"
-                             FontSize="18"
-                             Style="{StaticResource MenuButtonTheme}"
-                              Command="{Binding HomePageCommand}"
-                             ></RadioButton>
+                
 
                 <TextBlock Text="{Binding UserSubsTitle}"
                            Foreground="DarkSlateBlue"
@@ -262,7 +264,7 @@
                                             HorizontalAlignment="Left">
 
                                 <RadioButton Content="▲" 
-                                        FontSize="16"
+                                        FontSize="18"
                                         Background="Transparent"
                                         BorderThickness="0"
                                         Command="{Binding Path=DataContext.UpvoteCommand,RelativeSource=
@@ -273,12 +275,12 @@
                                          
                                     </RadioButton>
                                 <TextBlock Text="{Binding score}"
-                                           FontSize="16"
+                                           FontSize="18"
                                            >
 
                                 </TextBlock>
                                 <RadioButton Content="▼ " 
-                                             FontSize="16"
+                                             FontSize="18"
                                         Background="Transparent"
                                         BorderThickness="0"
                                          Command="{Binding Path=DataContext.DownvoteCommand,RelativeSource=
@@ -304,16 +306,86 @@
                     Grid.Row="1"
                     Grid.Column="1"
                     >
-                <Grid>
+                <Grid Background="#232323">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="20"></RowDefinition>
                         <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
-                    <Button Grid.Row="0" Content="Close" Command="{Binding CloseCommentsCommand}"></Button>
-                    <ListView Grid.Row="1"  ItemsSource="{Binding Comments}"
-                          Style="{StaticResource CommentsStyle}">
+                    <Button Grid.Row="0"
+                            Content="Close"
+                            Command="{Binding CloseCommentsCommand}"
+                             HorizontalAlignment="Left"
+                            Foreground="WhiteSmoke"
+                            Background="#232323"
+                            BorderThickness="0">
+                        
+                    </Button>
+                    <ListView Grid.Row="1" 
+                              ItemsSource="{Binding Comments}"
+                              Style="{StaticResource CommentsStyle}"
+                              ScrollViewer.CanContentScroll="True"
+                              >
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="4" >
+                                    <DockPanel.Style>
+                                        <Style TargetType="DockPanel">
+                                            <Style.Triggers>
+                                                
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor,
+                                                    AncestorType={x:Type ListBoxItem}},
+                                                    Path=IsSelected}" Value="True">     
+                                                    <Setter Property="Background" Value="#303030"></Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DockPanel.Style>
+                                    <StackPanel Margin="4,0,0,0">
+                                            
+                                        <TextBlock Text="{Binding body}"
+                                            FontWeight="Bold"
+                                            TextWrapping="Wrap"
+                                            FontSize="14">
 
+                                        </TextBlock>
+                                        <ListView ItemsSource="{Binding replieslist}"
+                                                  Style="{StaticResource CommentsStyle}">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <DockPanel Margin="10" >
+                                                        <DockPanel.Style>
+                                                            <Style TargetType="DockPanel">
+                                                                <Style.Triggers>
+                                                                    
+                                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor,
+                                                                        AncestorType={x:Type ListBoxItem}},
+                                                                        Path=IsSelected}" Value="True">
+                                                                        <Setter Property="Background" Value="#303030"></Setter>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </DockPanel.Style>
+                                                        <TextBlock Text="{Binding body}"
+                                                                   FontSize="12">
+
+                                                        </TextBlock>
+
+                                                    </DockPanel>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+
+
+                                    </StackPanel>
+
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
                     </ListView>
+
+
+
+
                 </Grid>
 
 

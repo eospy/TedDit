@@ -1,4 +1,7 @@
-﻿namespace RedditCLient.MVVM.Model
+﻿using System.Collections;
+using System.Collections.ObjectModel;
+
+namespace RedditCLient.MVVM.Model
 {
     public class CommentsData
     {
@@ -32,6 +35,8 @@
 
         public class Data1
         {
+            public Data1() => replieslist = new ObservableCollection<RepliesData.Data1>();
+            public ObservableCollection<RepliesData.Data1> replieslist { get; set; }
             public object? approved_at_utc { get; set; }
             public string? subreddit { get; set; }
             public string? selftext { get; set; }

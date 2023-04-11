@@ -70,7 +70,7 @@ namespace RedditCLient.MVVM.ViewModel
         string oauthurl = "https://oauth.reddit.com/";
         const string _defgrant = "grant_type=https://oauth.reddit.com/grants/installed_client&device_id=DO_NOT_TRACK_THIS_DEVICE";
         const string redirecturi = "http://127.0.0.1:8080/auth/";
-        private string subreddit = "cats";
+        private string subreddit = "Home Page";
         private string _subscribeButtonText;
         private string _secret = "Oif_vzUl172FuMjOYS1Keod0mXHrjQ";
         private string _action;
@@ -112,7 +112,6 @@ namespace RedditCLient.MVVM.ViewModel
             _client = new RestClient();
             server = new LocalServer();
             GetToken();
-            GetSubredditInfo();
             GetPostslist();
         }
         public void RefreshToken()
@@ -205,7 +204,7 @@ namespace RedditCLient.MVVM.ViewModel
         }
         public void GetPostslist(string next = "", string prev = "")
         {
-            if (Subreddit == "HOME")
+            if (Subreddit == "Home Page")
             {
                 GetHomePage(next,prev);
                 return;
@@ -313,7 +312,21 @@ namespace RedditCLient.MVVM.ViewModel
             request.AddHeader("user-agent", "Teddit by eospy");
             var response = _client.Get(request).Content;
             var root = Deserialize<CommentsData.Class1>(response)[1].data.children;
-            root.Select(r => r.data).ToList().ForEach(r => Comments.Add(r));
+            foreach (var comment in root)
+            {
+                var data = comment.data;
+                if (comment.data.replies != null)
+                {
+                    string repliesstring = comment.data.replies.ToString();
+                    if (repliesstring != "")
+                    {
+                        var list = JsonConvert.DeserializeObject<RepliesData.Rootobject>(repliesstring).data.children;
+                        list.Select(r => r.data).ToList().ForEach(r => data.replieslist.Add(r));
+                    }
+                    Comments.Add(data);
+                }
+                
+            }
 
         }
         public static List<T> Deserialize<T>(string SerializedJSONString)
@@ -430,7 +443,7 @@ namespace RedditCLient.MVVM.ViewModel
         }
         public string PageNumber
         {
-            protected set { SetProperty<string>(ref pagecounter, value); }
+            protected set => SetProperty<string>(ref pagecounter, value);
             get { return pagecounter; }
         }
         void AuthorizeButton()
@@ -485,6 +498,7 @@ namespace RedditCLient.MVVM.ViewModel
         void LoadPrevPage()
         {
             pagecount--;
+            if (pagecount < 2) pagecount = 1;
             PageNumber = pagecount.ToString();
             GetPostslist(prev: NextPage);
         }
