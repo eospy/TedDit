@@ -22,3 +22,8 @@ Version 0.4.
 1. Added home page
 2. Voting system
 3. Fixed comments
+
+Version 0.5.
+1. Home page set as default
+2. Fixed bugs
+3. Nested comments added and beautified
