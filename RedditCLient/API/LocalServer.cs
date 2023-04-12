@@ -17,13 +17,12 @@ namespace RedditCLient.API
         {
             server = new HttpListener();
             codestate = new();
-            // установка адресов прослушки
             server.Prefixes.Add("http://127.0.0.1:8080/auth/");
         }
         public void Stop() => server.Stop();
         public string Start(string requeststate)
         {
-            server.Start();// начинаем прослушивать входящие подключения
+            server.Start();
             var context =  server.GetContext();
             var req = context.Request;
             if (req.QueryString["error"] == null)
@@ -43,7 +42,6 @@ namespace RedditCLient.API
                         <h2>You can close this window</h2>
                     </body>
                 </html>";
-            //проверка на обоснованность выполнения запроса
             if (state != requeststate)
             {
                 responseText =
@@ -59,13 +57,9 @@ namespace RedditCLient.API
                 </html>";
             }
             var response = context.Response;
-            // отправляемый в ответ код htmlвозвращает
-          
             byte[] buffer = Encoding.UTF8.GetBytes(responseText);
-            // получаем поток ответа и пишем в него ответ
             response.ContentLength64 = buffer.Length;
             using Stream output = response.OutputStream;
-            // отправляем данные
             output.WriteAsync(buffer);
             output.FlushAsync();
             server.Stop();

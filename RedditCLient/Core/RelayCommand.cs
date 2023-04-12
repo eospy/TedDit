@@ -8,10 +8,8 @@ namespace RedditCLient.Core
         private readonly Action<object> _executeAction;
         private readonly Func<object, bool> _canExecuteAction;
 
-        // Событие, необходимое для ICommand
         public event EventHandler CanExecuteChanged;
 
-        // Два конструктора
         public RelayCommand(Action<object> execute, Func<object, bool> canExecute)
         {
             this._executeAction = execute;

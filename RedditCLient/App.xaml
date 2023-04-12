@@ -12,7 +12,6 @@
                 <ResourceDictionary Source="Theme/SearchTheme.xaml"></ResourceDictionary>
                 <ResourceDictionary Source="Theme/SearchResultsTheme.xaml"></ResourceDictionary>
                 <ResourceDictionary Source="Theme/UserSubsStyleTheme.xaml"></ResourceDictionary>
-                <ResourceDictionary Source="Theme/CommentsStyleTheme.xaml"></ResourceDictionary>
                 <ResourceDictionary Source="Theme/UpvoteButtonTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
           

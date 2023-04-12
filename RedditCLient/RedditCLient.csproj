@@ -5,15 +5,11 @@
     <TargetFramework>net6.0-windows8.0</TargetFramework>
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>ddd.ico</ApplicationIcon>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="icon.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="ddd.ico" />
   </ItemGroup>
 
   <ItemGroup>
