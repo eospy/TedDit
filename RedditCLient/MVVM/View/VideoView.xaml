@@ -1,0 +1,73 @@
+﻿<Window x:Class="RedditCLient.MVVM.View.VideoView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RedditCLient.MVVM.View"
+        xmlns:viewModel="clr-namespace:RedditCLient.MVVM.ViewModel"
+        mc:Ignorable="d"
+        Height="600" Width="920"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        Background="Transparent"
+        AllowsTransparency="True">
+    <Window.DataContext>
+        <viewModel:VideoViewModel/>
+    </Window.DataContext>
+    <Border Background="#202020"
+            CornerRadius="20">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="75"></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid Grid.Column="1">
+                <Border Margin="10"
+                           Background="Transparent"
+                           HorizontalAlignment="Right"
+                           Width="470"
+                           Height="40"
+                    MouseDown="Mouse_move">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="🗕"
+                                Width="30"
+                                Height="30"
+                                FontSize="20"
+                                BorderThickness="0"
+                                Foreground="#586c7d"
+                                Background="Transparent"
+                                Margin="0,0,0,3"
+                                Command="{Binding MinimizeButtonCommand}"
+                            >
+                        </Button>
+                        <Button Content="⎕"
+                            Width="30"
+                            Height="30"
+                            FontSize="20"
+                            BorderThickness="0"
+                            Foreground="#586c7d"
+                            Background="Transparent"
+                            Command="{Binding MaximixeButtonCommand}"
+                           >
+                        </Button>
+                        <Button Content="⨉"
+                            Width="30"
+                            Height="30"
+                            FontSize="20"
+                            BorderThickness="0"
+                            Foreground="#586c7d"
+                            Background="Transparent"
+                            Command="{Binding CloseWindowCommand}"
+                            >
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <MediaElement Grid.Row="1"
+                          Stretch="Fill" 
+                          Source="{Binding Videouri}">
+                
+            </MediaElement>
+        </Grid>
+    </Border>
+</Window>

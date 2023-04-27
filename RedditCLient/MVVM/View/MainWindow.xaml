@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RedditCLient"
-        xmlns:viewModel="clr-namespace:RedditCLient.MVVM.ViewModel"
+        xmlns:viewModel="clr-namespace:RedditCLient.MVVM.ViewModel" 
         mc:Ignorable="d"
         Height="600" Width="920"
         WindowStyle="None"
@@ -178,7 +178,7 @@
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Center">
                     <TextBlock Text="{Binding Title}"
-                           Foreground="White"
+                               Foreground="White"
                            FontSize="20"
                            FontFamily="Verdana"></TextBlock>
                     <Button Content="{Binding SubscribeButtonText}"
@@ -236,10 +236,14 @@
                                             Foreground="White"
                                            Background="#586c7d"
                                            FontSize="12"
+                                           VerticalAlignment="Top"
                                            FontStyle="Normal"
                                            Height="15"></TextBlock>
                                 <TextBlock Text="{Binding title}"
-                                   FontWeight="Bold" 
+                                   FontWeight="Bold"
+                                   MaxWidth="560"
+                                   Margin="10,0,0,0"
+                                   TextTrimming="CharacterEllipsis"
                                    TextWrapping="Wrap"
                                    Foreground="White"
                                    FontSize="24"></TextBlock>
@@ -251,20 +255,13 @@
                                    MaxHeight="400"
                                    >
                             </Image>
-                            <TextBlock Text="{Binding selftext}"
-                                       TextTrimming="CharacterEllipsis"
-                                       MaxHeight="200"
-                                       FontWeight="Bold" 
-                                       TextWrapping="Wrap"
-                                       Foreground="White"
-                                       FontSize="14">
-
-                            </TextBlock>
+                                
+                                
                                 <StackPanel Orientation="Horizontal"
                                             HorizontalAlignment="Left">
 
                                 <RadioButton Content="▲" 
-                                        FontSize="18"
+                                        FontSize="24"
                                         Background="Transparent"
                                         BorderThickness="0"
                                         Command="{Binding Path=DataContext.UpvoteCommand,RelativeSource=
@@ -275,12 +272,12 @@
                                          
                                     </RadioButton>
                                 <TextBlock Text="{Binding score}"
-                                           FontSize="18"
+                                           FontSize="24"
                                            >
 
                                 </TextBlock>
                                 <RadioButton Content="▼ " 
-                                             FontSize="18"
+                                             FontSize="24"
                                         Background="Transparent"
                                         BorderThickness="0"
                                          Command="{Binding Path=DataContext.DownvoteCommand,RelativeSource=
@@ -289,6 +286,16 @@
                                           Style="{StaticResource UpvoteButton}">
                                  
                                 </RadioButton>
+                                    <Button Content="≡"
+                                            FontSize="24"
+                                            Background="Transparent"
+                                            Foreground="White"
+                                            BorderThickness="0"
+                                            Command="{Binding Path=DataContext.OpenCommentsCommand,RelativeSource=
+                                   {RelativeSource FindAncestor, 
+                                   AncestorType={x:Type ItemsControl}}}">
+                                        
+                                    </Button>
 
                             </StackPanel>
 
@@ -325,13 +332,14 @@
                               ItemsSource="{Binding CommentsList}">
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding RepliesList}">
-                                <Label >
+                                <Label MaxWidth="640" >
                                     <TextBlock Text="{Binding CommentBody}"
                                                TextWrapping="Wrap"
                                                Foreground="WhiteSmoke"
                                                LineStackingStrategy="BlockLineHeight" 
                                                LineHeight="20"
-                                               FontSize="16">
+                                                TextTrimming="CharacterEllipsis"
+                                                FontSize="16">
                                         
                                         
                                     </TextBlock>
@@ -343,7 +351,9 @@
                                                 LineStackingStrategy="BlockLineHeight" 
                                                LineHeight="20"
                                                        Foreground="WhiteSmoke"
-                                                 FontSize="14">
+                                                 FontSize="14"
+                                                        TextTrimming="CharacterEllipsis"
+                                              TextWrapping="Wrap">
                                                 
                                             </TextBlock>
                                         </Label>
@@ -358,6 +368,37 @@
 
 
 
+            </Popup>
+            <Popup PlacementTarget="{Binding ElementName=ListView}"
+                    Placement="RelativePoint"                    
+                    Width="700"
+                    Height="465"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                IsOpen="{Binding PostViewIsOpen}">
+                <Grid Background="#202020">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Button Content="Close"
+                            Grid.Row="0"
+                            Command="{Binding ClosePostViewCommand}">
+
+                    </Button>
+                    <ScrollViewer Grid.Row="1">
+                        <TextBlock 
+                               FontSize="16"
+                               Foreground="WhiteSmoke"
+                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis"
+                               Text="{Binding PostText}">
+
+                        </TextBlock>
+                    </ScrollViewer>
+                    
+                    
+                </Grid>
             </Popup>
             <StackPanel  Grid.Row="1"
                          Grid.Column="0"

@@ -1,6 +1,7 @@
 ﻿using RedditCLient.Core;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace RedditCLient.API
 {
@@ -33,8 +34,9 @@ namespace RedditCLient.API
             {
 
             }
-            public Data1(string subreddit_name_prefixed, string id, string subreddit, string title,string url_overridden_by_dest,string selftext,int score,int numcomments)
+            public Data1(string subreddit_name_prefixed, string id, string subreddit, string title,string url_overridden_by_dest,string selftext,int score,int numcomments, string videouri = null)
             {
+                this.videouri = videouri;
                 this.id = id;
                 this.title = title;
                 this.url_overridden_by_dest=url_overridden_by_dest;
@@ -44,6 +46,7 @@ namespace RedditCLient.API
                 this.num_comments=numcomments;
                 this.subreddit_name_prefixed=subreddit_name_prefixed;
             }
+            public string? videouri { get; set; }
             public object? approved_at_utc { get; set; }
             public string? subreddit { get; set; }
             public string? selftext { get; set; }

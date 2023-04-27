@@ -8,12 +8,16 @@ using RestSharp.Authenticators.OAuth2;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Xml.Linq;
+using RedditCLient.MVVM.View;
 
 namespace RedditCLient.MVVM.ViewModel
 {
@@ -33,7 +37,9 @@ namespace RedditCLient.MVVM.ViewModel
         public RelayCommand SearchButtonCommand { get; set; }
         public RelayCommand SubredditSelectCommand { get; set; }
         public RelayCommand AuthorizeCommand { get; set; }
+        public RelayCommand OpenCommentsCommand { get; set; }
         public RelayCommand CloseCommentsCommand { get; set; }
+        public RelayCommand ClosePostViewCommand { get; set; }
         public RelayCommand SubscribeCommand { get; set; }
         public RelayCommand HomePageCommand { get; set; }
         public RelayCommand UpvoteCommand { get; set; }
@@ -60,6 +66,7 @@ namespace RedditCLient.MVVM.ViewModel
         private string _description;
         private bool _popupIsOpen;
         private bool _commentsIsOpen;
+        private bool _postViewIsOpen;
         private bool _subscribeButtonIsOpen;
         private bool authorized = false;
         private string pagecounter;
@@ -73,31 +80,34 @@ namespace RedditCLient.MVVM.ViewModel
         public string NextPage { get; set; }
         public string Background { get; set; }   
         private string subreddit = "Home Page";
+        private string _posttext;
         private string _subscribeButtonText;
 
 
-        string baseurl = "https://www.reddit.com/";
-        string oauthurl = "https://oauth.reddit.com/";
+        string baseurl = ConfigValue("baseurl");
+        string oauthurl = ConfigValue("oauthurl");
         const string _defgrant = "grant_type=https://oauth.reddit.com/grants/installed_client&device_id=DO_NOT_TRACK_THIS_DEVICE";
         
-
         //script only parameters 
-        private string _secret = "Oif_vzUl172FuMjOYS1Keod0mXHrjQ";
-        private string _client_id = "m2wRkX8IpaY1u8v6oN7Baw";
+        private string _secret = ConfigValue("secret");
+        private string _client_id = ConfigValue("client_id");
 
         //app only auth client id 
-        private string _app_client_id = "BF4HDny1XofDp2ZwrmOYbA";
+        private string _app_client_id = ConfigValue("app_client_id");
 
         //parameters generated while app registration
-        const string redirecturi = "http://127.0.0.1:8080/auth/";
-        private string _useragent = "Teddit by eospy";
+        string redirecturi = ConfigValue("redirecturi");
+        private string _useragent = ConfigValue("useragent");
 
         private string _action;
         private bool _subscribeButtonState;
         public string token;
         private string _refreshToken = "";
         public string state;
-        
+
+        public RelayCommand PlayVideoCommand { get; set; }
+        public RelayCommand PauseVideoCommand { get; set; }
+        public RelayCommand StopVideoCommand { get; set; }
         public MainWindowModel()
         {
             HotCategoryCommand = new RelayCommand(o => HotCategory());
@@ -110,11 +120,16 @@ namespace RedditCLient.MVVM.ViewModel
             LoadPrevPageCommand = new RelayCommand(o => LoadPrevPage());
             SearchButtonCommand = new RelayCommand(o => SearchButton());
             AuthorizeCommand = new RelayCommand(o => AuthorizeButton());
+            OpenCommentsCommand = new RelayCommand(o => OpenComments());
             CloseCommentsCommand = new RelayCommand(o => CloseComments());
-            SubscribeCommand=new RelayCommand(o=>Subscribe());
+            ClosePostViewCommand = new RelayCommand(o => ClosePostView());
+            SubscribeCommand =new RelayCommand(o=>Subscribe());
             HomePageCommand = new RelayCommand(o => SetHomePage());
             UpvoteCommand = new RelayCommand(o => Upvote());
             DownvoteCommand = new RelayCommand(o => Downvote());
+            PlayVideoCommand = new RelayCommand(o => Play());
+            PauseVideoCommand = new RelayCommand(o => Pause());
+            StopVideoCommand = new RelayCommand(o => Stop());
             Posts = new ObservableCollection<PostModel.Data1>();
             Curposts = new ObservableCollection<PostModel.Data1>();
             SearchResults = new ObservableCollection<SearchData.Data1>();
@@ -131,6 +146,10 @@ namespace RedditCLient.MVVM.ViewModel
             server = new LocalServer();
             GetToken();
             GetPostslist();
+        }
+        private static string ConfigValue(string key)
+        {
+            return ConfigurationManager.AppSettings[key].ToString();
         }
         public void RefreshToken()
         {
@@ -204,7 +223,18 @@ namespace RedditCLient.MVVM.ViewModel
             catch (Exception) { MessageBox.Show("Subreddit loading problem"); }
             var root = JsonConvert.DeserializeObject<HomePageData.Rootobject>(response.Content);
             NextPage = root.data.after;
-            root.data.children.Select(r => r.data).ToList().ForEach(r => Curposts.Add(new PostModel.Data1(r.subreddit_name_prefixed, r.id,r.subreddit,r.title, r.url_overridden_by_dest, r.selftext, r.score,r.num_comments)));
+            //root.data.children.Select(r => r.data).ToList().ForEach(r => Curposts.Add(new PostModel.Data1("заглушка",r.subreddit_name_prefixed, r.id,r.subreddit,r.title, r.url_overridden_by_dest, r.selftext, r.score,r.num_comments)));
+            foreach (var post in root.data.children)
+            {
+                var p = post.data;
+                var data = new PostModel.Data1(p.subreddit_name_prefixed, p.id, p.subreddit, p.title, p.url_overridden_by_dest, p.selftext, p.score, p.num_comments);
+                if (data.media != null)
+                {
+                    data.videouri = JsonConvert.DeserializeObject<VideoData.Rootobject>(data.media.ToString()).reddit_video?.fallback_url;
+
+                }
+                Curposts.Add(data);
+            }
             switch (category)
             {
                 case "new":
@@ -224,6 +254,7 @@ namespace RedditCLient.MVVM.ViewModel
                 GetHomePage(next,prev);
                 return;
             }
+            if (authorized) SubscribeButtonIsOpen = true;
             Posts.Clear();
             Curposts.Clear();
             string uri = oauthurl + "r/" + Subreddit + "/" + category;
@@ -236,16 +267,24 @@ namespace RedditCLient.MVVM.ViewModel
             try
             {
                 response = _client.GetAsync(request).GetAwaiter().GetResult();
-
             }
             catch (Exception)
             {
                 MessageBox.Show("Subreddit loading problem");
             }
+            if (response.Content == null) return;
             var root = JsonConvert.DeserializeObject<PostModel.Rootobject>(response.Content).data;
             NextPage = root.after;
-            root.children.Select(r => r.data).ToList().ForEach(r => Curposts.Add(r));
-
+            foreach (var post in root.children)
+            {
+                var data = post.data;
+                if (data.media != null)
+                {
+                    data.videouri = JsonConvert.DeserializeObject<VideoData.Rootobject>(data.media.ToString()).reddit_video?.fallback_url;
+                   
+                }
+                Curposts.Add(data);
+            }
             switch (category)
             {
                 case "new":
@@ -298,9 +337,13 @@ namespace RedditCLient.MVVM.ViewModel
 
             }
             catch (Exception) { }
-            var data = JsonConvert.DeserializeObject<SubredditData.Rootobject>(response.Content).data;
-            Title = data.title;
-            Description = data.public_description;
+            if (response.Content != null)
+            {
+                var data = JsonConvert.DeserializeObject<SubredditData.Rootobject>(response.Content).data;
+                Title = data?.title;
+                Description = data?.public_description;
+            }
+           
         }
         public void SearchSubreddits(string search)
         {
@@ -321,14 +364,14 @@ namespace RedditCLient.MVVM.ViewModel
         }
         public List<Comment> CommentsRecursiveAdd(string body,string repliesstring)
         {
-            List<Comment> replieslist = new List<Comment>();
+            List<Comment> replieslist = new();
             if (repliesstring != "")
             {
                 var list = JsonConvert.DeserializeObject<RepliesData.Rootobject>(repliesstring).data.children;
                 replieslist = new List<Comment>();
                 foreach (var r in list)
                 {
-                    Comment c = new Comment(r.data.body);
+                    Comment c = new(r.data.body);
                     if (r.data.replies != null)
                     {
                         c.RepliesList = CommentsRecursiveAdd(r.data.body,r.data.replies.ToString());
@@ -375,10 +418,15 @@ namespace RedditCLient.MVVM.ViewModel
             get { return _selectedPost; }
             set
             {
-                _selectedPost = value; 
-                if (_selectedPost != null && _selectedPost.num_comments > 0)
-                    OpenComments();
+                _selectedPost = value;
+                PostText = value?.selftext;
+                PostViewIsOpen = PostText != "";
             }
+        }
+        public string PostText
+        {
+            get => _posttext;
+            set => SetProperty(ref _posttext, value);
         }
         public UserSubsData.Data1 SelectedUserSub
         {
@@ -413,15 +461,36 @@ namespace RedditCLient.MVVM.ViewModel
 
             }
         }
+
+        private void Play()
+        {
+           // _selectedPost.Player.Play();
+        }
+        private void Pause()
+        {
+            //_selectedPost.Player.Pause();
+        }
+        private void Stop()
+        {
+            //_selectedPost.Player.Stop();
+        }
         void OpenComments()
         {
-            GetComments(SelectedPost.id);
-            CommentsIsOpen = true;
+            if (_selectedPost != null && _selectedPost.num_comments > 0)
+            {
+                GetComments(SelectedPost.id);
+                CommentsIsOpen = true;
+            }
+            
         }
         void CloseComments()
         {
             CommentsIsOpen = false;
             CommentsList.Clear();
+        }
+        void ClosePostView()
+        {
+            PostViewIsOpen= false;
         }
         void SearchButton()
         {
@@ -435,7 +504,11 @@ namespace RedditCLient.MVVM.ViewModel
             get => _commentsIsOpen;
             set => SetProperty(ref _commentsIsOpen, value);
         }
-
+        public bool PostViewIsOpen
+        {
+            get => _postViewIsOpen;
+            set => SetProperty(ref _postViewIsOpen, value);
+        }
         public bool PopupIsOpen
         {
             get => _popupIsOpen;
@@ -488,7 +561,6 @@ namespace RedditCLient.MVVM.ViewModel
                 GetToken(body);
                 GetUserSubs();
                 UserSubsTitle = "Your communities";
-                SubscribeButtonIsOpen = true;
                 SubscribeButtonState(UserSubs.Any(s => s.display_name == Subreddit));
                 authorized = true;
             }
@@ -563,6 +635,8 @@ namespace RedditCLient.MVVM.ViewModel
         }
         static void MinimizeWindow()
         {
+            //VideoView view = new VideoView();
+            //view.Show();
             Application.Current.MainWindow.WindowState = WindowState.Minimized;
         }
         static void MaximizeWindow()
