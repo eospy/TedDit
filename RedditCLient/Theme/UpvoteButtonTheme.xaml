@@ -18,11 +18,13 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
         </Style.Setters>
         <Style.Triggers>
             <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Foreground" Value="#586c7d"></Setter>
+                <Setter Property="Foreground" Value="Pink"></Setter>
             </Trigger>
         </Style.Triggers>
     </Style>

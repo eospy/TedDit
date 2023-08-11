@@ -40,78 +40,11 @@
                                 </Style.Triggers>
                             </Style>
                         </DockPanel.Style>
-                        
+
 
 
                     </DockPanel>
                 </DataTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <Style x:Key="Scrollbar" TargetType="{x:Type RepeatButton}">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type RepeatButton}">
-                    <Rectangle Fill="{TemplateBinding Background}"/>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <Style x:Key="ScrollbarButton" TargetType="{x:Type RepeatButton}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type RepeatButton}">
-                    <Border x:Name="Border"
-                            BorderThickness="1"
-                            SnapsToDevicePixels="True"
-                            Background="DarkSlateBlue"
-                            BorderBrush="DarkSlateBlue">
-                        <ContentPresenter/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <Style x:Key="ScrollbarThumbVertical" TargetType="{x:Type Thumb}">
-        <Setter Property="OverridesDefaultStyle" Value="True"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Thumb}">
-                    <Rectangle x:Name="Rectangle"
-                            SnapsToDevicePixels="True"
-                            Fill="#424242"
-                            Width="{TemplateBinding Width}"
-                            Height="{TemplateBinding Height}"/>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <Style TargetType="{x:Type ScrollBar}">
-        <Setter Property="Background" Value="#252525"/>
-        <Setter Property="BorderBrush" Value="#252525"/>
-        <Setter Property="BorderThickness" Value="1,0"/>
-        <Setter Property="Width" Value="12"/>
-        <Setter Property="MinWidth" Value="12"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ScrollBar}">
-                    <Grid SnapsToDevicePixels="True">
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Border BorderThickness="{TemplateBinding BorderThickness}"
-                                Grid.Row="1"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"/>
-                        <Track IsDirectionReversed="True"
-                               Grid.Row="1">
-                            <Track.Thumb>
-                                <Thumb Style="{DynamicResource ScrollbarThumbVertical}"/>
-                            </Track.Thumb>
-                        </Track>
-                    </Grid>
-                </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>

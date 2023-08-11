@@ -1,0 +1,652 @@
+﻿using Newtonsoft.Json;
+using RedditCLient.API;
+using RedditCLient.Core;
+using RedditCLient.MVVM.Model;
+using RestSharp;
+using RestSharp.Authenticators;
+using RestSharp.Authenticators.OAuth2;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Configuration;
+using System.Diagnostics;
+using System.Linq;
+using System.Windows;
+
+namespace RedditCLient.MVVM.ViewModel
+{
+    public class MainViewModel : ViewModelBase
+    {
+        private RelayCommand _closeWindow;
+        public RelayCommand CloseWindowCommand => _closeWindow ?? new RelayCommand(o => CloseWindow());
+        private RelayCommand _hotCategory;
+        public RelayCommand HotCategoryCommand => _hotCategory ?? new RelayCommand(o => HotCategory());
+
+        private RelayCommand _newCategory;
+        public RelayCommand NewCategoryCommand => _newCategory ?? new RelayCommand(o => NewCategory());
+        private RelayCommand _topCategory;
+        public RelayCommand TopCategoryCommand => _topCategory ?? new RelayCommand(o => TopCategory());
+        private RelayCommand _minButton;
+        public RelayCommand MinimizeButtonCommand => _minButton ?? new RelayCommand(o => MinimizeWindow());
+        private RelayCommand _maxButton;
+        public RelayCommand MaximixeButtonCommand => _maxButton ?? new RelayCommand(o => MaximizeWindow());
+        private RelayCommand _loadNext;
+        public RelayCommand LoadNextPageCommand => _loadNext ?? new RelayCommand(o => LoadNextPage());
+        private RelayCommand _loadPrev;
+        public RelayCommand LoadPrevPageCommand => _loadPrev ?? new RelayCommand(o => LoadPrevPage());
+        private RelayCommand _searchBtn;
+        public RelayCommand SearchButtonCommand => _searchBtn ?? new RelayCommand(o => SearchButton());
+
+        private RelayCommand _authorize;
+        public RelayCommand AuthorizeCommand => _authorize ?? new RelayCommand(o => AuthorizeButton());
+        private RelayCommand _openComments;
+        public RelayCommand OpenCommentsCommand => _openComments ?? new RelayCommand(o => OpenComments());
+        private RelayCommand _closeComments;
+        public RelayCommand CloseCommentsCommand => _closeComments ?? new RelayCommand(o => CloseComments());
+        private RelayCommand _closePostView;
+        public RelayCommand ClosePostViewCommand => _closePostView ?? new RelayCommand(o => ClosePostView());
+        private RelayCommand _subscribe;
+        public RelayCommand SubscribeCommand => _subscribe ?? new RelayCommand(o => Subscribe());
+        private RelayCommand _homePage;
+        public RelayCommand HomePageCommand => _homePage ?? new RelayCommand(o => SetHomePage());
+        private RelayCommand _upvote;
+        public RelayCommand UpvoteCommand => _upvote ?? new RelayCommand(o => Upvote());
+        private RelayCommand _downvote;
+        public RelayCommand DownvoteCommand => _downvote ?? new RelayCommand(o => Downvote());
+
+        public ObservableCollection<PostModel.Post> Posts { get; set; }
+        public ObservableCollection<PostModel.Post> Cachedhot { get; set; }
+        public ObservableCollection<PostModel.Post> Cachednew { get; set; }
+        public ObservableCollection<PostModel.Post> Cachedtop { get; set; }
+        public ObservableCollection<PostModel.Post> Curposts { get; set; }
+        public ObservableCollection<SearchData.Data1> SearchResults { get; set; }
+        public ObservableCollection<UserSubsData.Data1> UserSubs { get; set; }
+        public ObservableCollection<Comment> CommentsList { get; set; }
+
+
+        private SearchData.Data1 _selectedSubreddit;
+        private UserSubsData.Data1 _selectedusersub;
+        private PostModel.Post _selectedPost;
+        private string _title;
+        private string _usersubstitle;
+        private string _description;
+        private bool _popupIsOpen;
+        private bool _commentsIsOpen;
+        private bool _postViewIsOpen;
+        private bool _subscribeButtonIsOpen;
+        private bool authorized = false;
+        private string pagecounter = "1";
+        private int pagecount = 1;
+        string category = "";
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        private static Random random;
+        private RestClient _client;
+        LocalServer server;
+        public string Icon { get; set; }
+        public string NextPage { get; set; }
+        public string Background { get; set; }
+        private string subreddit = "Home Page";
+        private string _posttext;
+        private string _subscribeButtonText;
+
+        JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Ignore
+        };
+        string baseurl = ConfigValue("baseurl");
+        string oauthurl = ConfigValue("oauthurl");
+        const string _defgrant = "grant_type=https://oauth.reddit.com/grants/installed_client&device_id=DO_NOT_TRACK_THIS_DEVICE";
+
+        //script only parameters 
+        private string _secret = ConfigValue("secret");
+        private string _client_id = ConfigValue("client_id");
+
+        //app only auth client id 
+        private string _app_client_id = ConfigValue("app_client_id");
+
+        //parameters generated while app registration
+        string redirecturi = ConfigValue("redirecturi");
+        private string _useragent = ConfigValue("useragent");
+
+        private string _action;
+        private bool _subscribeButtonState;
+        public string token;
+        private string _refreshToken = "";
+        public string state;
+
+        public RelayCommand PlayVideoCommand { get; set; }
+        public RelayCommand PauseVideoCommand { get; set; }
+        public RelayCommand StopVideoCommand { get; set; }
+        public MainViewModel()
+        {
+            Posts = new ObservableCollection<PostModel.Post>();
+            Curposts = new ObservableCollection<PostModel.Post>();
+            SearchResults = new ObservableCollection<SearchData.Data1>();
+            UserSubs = new ObservableCollection<UserSubsData.Data1>();
+            CommentsList = new ObservableCollection<Comment>();
+
+            _selectedSubreddit = new SearchData.Data1();
+            _selectedusersub = new UserSubsData.Data1();
+            _selectedPost = new PostModel.Post();
+            random = new Random();
+            state = GetRandomString();
+            _client = new RestClient();
+            server = new LocalServer();
+            GetToken();
+            GetPostslist();
+        }
+        private static string ConfigValue(string key)
+        {
+            return ConfigurationManager.AppSettings[key].ToString();
+        }
+        public void RefreshToken()
+        {
+            GetToken("grant_type=refresh_token&refresh_token=" + _refreshToken);
+        }
+        public void GetToken(string granttype = _defgrant)
+        {
+            string password = _secret;
+            string username = _client_id;
+            if (granttype != _defgrant)
+            {
+                username = _app_client_id;
+                password = "";
+            }
+            _client.Authenticator = new HttpBasicAuthenticator(username, password);
+            var request = new RestRequest(baseurl + "api/v1/access_token", Method.Post);
+            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+            request.AddHeader("user-agent", _useragent);
+            request.AddBody(granttype);
+            var response = _client.Post(request);
+            var data = response.Content;
+            var root = JsonConvert.DeserializeObject<Token.Rootobject>(data,settings);
+            token = root.access_token;
+            _refreshToken = root.refresh_token;
+        }
+        bool CanVote() => authorized && _selectedPost.name != null;
+        void Upvote()
+        {
+            if (CanVote())
+                Vote(1);
+        }
+        void Downvote()
+        {
+            if (CanVote())
+                Vote(-1);
+        }
+        public void Vote(int vote)
+        {
+            string uri = oauthurl + "api/vote/";
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Post);
+            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+            request.AddHeader("user-agent", _useragent);
+            request.AddParameter("dir", vote);
+            request.AddParameter("id", _selectedPost.name);
+            _client.Post(request);
+        }
+        void SetHomePage()
+        {
+            Subreddit = "Home Page";
+            GetHomePage();
+        }
+        public void GetHomePage(string next = "", string prev = "")
+        {
+            Posts.Clear();
+            Curposts.Clear();
+            Title = "";
+            Description = "";
+            SubscribeButtonText = "";
+            string uri = oauthurl + "/" + category;
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Get);
+            request.AddHeader("user-agent", _useragent);
+            request.AddParameter("after", next);
+            request.AddParameter("before", prev);
+            RestResponse response = new();
+            try
+            {
+                response = _client.GetAsync(request).GetAwaiter().GetResult();
+            }
+            catch (Exception) { MessageBox.Show("Subreddit loading problem"); }
+            var root = JsonConvert.DeserializeObject<HomePageData>(response.Content,settings);
+            NextPage = root.data.after;
+            foreach (var post in root.data.children)
+            {
+                var p = post.data;
+                var data = new PostModel.Post(p.subreddit_name_prefixed, p.id, p.subreddit, p.title, p.url_overridden_by_dest, p.selftext, p.score, p.num_comments);
+                /*
+                if (data.media != null)
+                {
+                    data.videouri = JsonConvert.DeserializeObject<VideoData.Rootobject>(data.media.ToString()).reddit_video?.fallback_url;
+
+                }
+                */
+                Curposts.Add(data);
+            }
+            switch (category)
+            {
+                case "new":
+                    Cachednew = Curposts; break;
+                case "hot":
+                    Cachedhot = Curposts; break;
+                case "top":
+                    Cachedtop = Curposts; break;
+
+            }
+            Posts = Curposts;
+        }
+        public void GetPostslist(string next = "", string prev = "")
+        {
+            if (Subreddit == "Home Page")
+            {
+                GetHomePage(next, prev);
+                return;
+            }
+            if (authorized) SubscribeButtonIsOpen = true;
+            Posts.Clear();
+            Curposts.Clear();
+            string uri = oauthurl + "r/" + Subreddit + "/" + category;
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Get);
+            request.AddHeader("user-agent", _useragent);
+            request.AddParameter("after", next);
+            request.AddParameter("before", prev);
+            RestResponse response = new();
+            try
+            {
+                response = _client.GetAsync(request).GetAwaiter().GetResult();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Subreddit loading problem");
+            }
+            if (response.Content == null) return;
+            var root = JsonConvert.DeserializeObject<PostModel>(response.Content, settings).data;
+            NextPage = root.after;
+            foreach (var post in root.children)
+            {
+                var data = post.data;
+                /*
+                if (data.media != null)
+                {
+                    data.videouri = JsonConvert.DeserializeObject<VideoData.Rootobject>(data.media.ToString()).reddit_video?.fallback_url;
+
+                }
+                */
+                Curposts.Add(data);
+            }
+            switch (category)
+            {
+                case "new":
+                    Cachednew = Curposts; break;
+                case "hot":
+                    Cachedhot = Curposts; break;
+                case "top":
+                    Cachedtop = Curposts; break;
+
+            }
+            Posts = Curposts;
+        }
+        public void GetUserSubs()
+        {
+            string uri = oauthurl + "/subreddits/mine/subscriber";
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Get);
+            request.AddHeader("user-agent", _useragent);
+            string response = "";
+            try
+            {
+                response = _client.GetAsync(request).GetAwaiter().GetResult().Content;
+            }
+            catch (Exception) { }
+            var root = JsonConvert.DeserializeObject<UserSubsData>(response, settings).data.children;
+            root.Select(r => r.data).ToList().ForEach(r => UserSubs.Add(r));
+        }
+        public void Subscribe()
+        {
+            string uri = oauthurl + "api/subscribe/";
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Post);
+            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+            request.AddHeader("user-agent", _useragent);
+            request.AddParameter("action", _action);
+            request.AddParameter("sr_name", Subreddit);
+            _client.Post(request);
+            SubscribeButtonState(!_subscribeButtonState);
+        }
+        public void GetSubredditInfo()
+        {
+            string uri = oauthurl + "r/" + Subreddit + "/" + "about";
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Get);
+            request.AddHeader("user-agent", _useragent);
+            RestResponse response = new();
+            try
+            {
+                response = _client.GetAsync(request).GetAwaiter().GetResult();
+
+            }
+            catch (Exception) { }
+            if (response.Content != null)
+            {
+                var data = JsonConvert.DeserializeObject<SubredditData>(response.Content, settings).data;
+                Title = data?.title;
+                Description = data?.public_description;
+            }
+
+        }
+        public void SearchSubreddits(string search)
+        {
+            string uri = oauthurl + "subreddits/search";
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Get);
+            request.AddHeader("user-agent", _useragent);
+            request.AddParameter("q", search);
+            RestResponse response = new();
+            try
+            {
+                response = _client.GetAsync(request).GetAwaiter().GetResult();
+
+            }
+            catch (Exception) { MessageBox.Show("Subreddit search problem"); }
+            var root = JsonConvert.DeserializeObject<SearchData>(response.Content, settings).data.children;
+            root.Select(r => r.data).ToList().ForEach(r => SearchResults.Add(r));
+        }
+        public List<Comment> CommentsRecursiveAdd(string body, string repliesstring)
+        {
+            List<Comment> replieslist = new();
+            if (repliesstring != "")
+            {
+                var list = JsonConvert.DeserializeObject<RepliesData>(repliesstring, settings).data.children;
+                replieslist = new List<Comment>();
+                foreach (var r in list)
+                {
+                    Comment c = new(r.data.body);
+                    if (r.data.replies != null)
+                    {
+                        c.RepliesList = CommentsRecursiveAdd(r.data.body, r.data.replies.ToString());
+                    }
+                    replieslist.Add(c);
+
+                }
+            }
+            return replieslist;
+
+        }
+        public void GetComments(string postLink)
+        {
+            string uri = oauthurl + "/comments/" + postLink;
+            _client.Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(token, "Bearer");
+            var request = new RestRequest(uri, Method.Get);
+            request.AddHeader("user-agent", _useragent);
+            var response = _client.Get(request).Content;
+            var comments = JsonConvert.DeserializeObject<CommentsData[]>(response,settings)[1].data.children;
+            foreach (var c in comments)
+            {
+                Comment comment = new(c.data.body);
+                if (c.data.replies != null)
+                {
+                    string repliesstring = c.data.replies.ToString();
+                    comment.RepliesList = CommentsRecursiveAdd(c.data.body, repliesstring);
+                }
+                CommentsList.Add(comment);
+
+            }
+
+        }
+        public string Subreddit
+        {
+            get => subreddit;
+            set => subreddit = value;
+        }
+        public PostModel.Post SelectedPost
+        {
+            get { return _selectedPost; }
+            set
+            {
+                _selectedPost = value;
+                PostText = value?.selftext;
+                PostViewIsOpen = PostText != "";
+            }
+        }
+        public string PostText
+        {
+            get => _posttext;
+            set => SetProperty(ref _posttext, value);
+        }
+        public UserSubsData.Data1 SelectedUserSub
+        {
+            get { return _selectedusersub; }
+            set
+            {
+                if (value != null)
+                {
+                    SetProperty(ref _selectedusersub, value);
+                    Subreddit = _selectedusersub.display_name;
+                    GetSubredditInfo();
+                    GetPostslist();
+                    SubscribeButtonState(true);
+                }
+
+            }
+        }
+        public SearchData.Data1 SelectedSubreddit
+        {
+            get { return _selectedSubreddit; }
+            set
+            {
+                if (value != null)
+                {
+                    SetProperty(ref _selectedSubreddit, value);
+                    Subreddit = _selectedSubreddit.display_name; ;
+                    PopupIsOpen = false;
+                    GetSubredditInfo();
+                    GetPostslist();
+                    SubscribeButtonState(UserSubs.Any(s => s.display_name == Subreddit));
+                }
+
+            }
+        }
+
+        void OpenComments()
+        {
+            if (_selectedPost != null && _selectedPost.num_comments > 0)
+            {
+                GetComments(SelectedPost.id);
+                CommentsIsOpen = true;
+            }
+
+        }
+        void CloseComments()
+        {
+            CommentsIsOpen = false;
+            CommentsList.Clear();
+        }
+        void ClosePostView()
+        {
+            PostViewIsOpen = false;
+        }
+        void SearchButton()
+        {
+            SearchResults.Clear();
+            SearchSubreddits(subreddit);
+            PopupIsOpen = true;
+        }
+
+        public bool CommentsIsOpen
+        {
+            get => _commentsIsOpen;
+            set => SetProperty(ref _commentsIsOpen, value);
+        }
+        public bool PostViewIsOpen
+        {
+            get => _postViewIsOpen;
+            set => SetProperty(ref _postViewIsOpen, value);
+        }
+        public bool PopupIsOpen
+        {
+            get => _popupIsOpen;
+            set => SetProperty(ref _popupIsOpen, value);
+        }
+        public bool SubscribeButtonIsOpen
+        {
+            get => _subscribeButtonIsOpen;
+            set => SetProperty(ref _subscribeButtonIsOpen, value);
+        }
+        public string SubscribeButtonText
+        {
+            get { return _subscribeButtonText; }
+            set { SetProperty(ref _subscribeButtonText, value); }
+        }
+        public string Title
+        {
+            get { return _title; }
+            set { SetProperty<string>(ref _title, value); }
+        }
+        public string UserSubsTitle
+        {
+            get { return _usersubstitle; }
+            set { SetProperty<string>(ref _usersubstitle, value); }
+        }
+        public string Description
+        {
+            get { return _description; }
+            set { SetProperty<string>(ref _description, value); }
+        }
+        public string PageNumber
+        {
+            protected set => SetProperty<string>(ref pagecounter, value);
+            get { return pagecounter; }
+        }
+        void AuthorizeButton()
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = @"https://www.reddit.com/api/v1/authorize?client_id=" + _app_client_id + "&response_type=code&state="
+                + state + "&redirect_uri=" +
+                redirecturi + "&duration=permanent&" +
+                "scope=mysubreddits submit save read vote identity subscribe",
+                UseShellExecute = true
+            });
+            string code = server.Start(state);
+            if (code != "")
+            {
+                string body = "grant_type=authorization_code&code=" + code + "&redirect_uri=" + redirecturi;
+                GetToken(body);
+                GetUserSubs();
+                UserSubsTitle = "Your communities";
+                SubscribeButtonState(UserSubs.Any(s => s.display_name == Subreddit));
+                authorized = true;
+            }
+
+        }
+        void SubscribeButtonState(bool state)
+        {
+            if (!SubscribeButtonIsOpen) return;
+            _subscribeButtonState = state;
+            if (state)
+            {
+                _action = "unsub";
+                SubscribeButtonText = "Unsubscribe";
+            }
+            else
+            {
+                _action = "sub";
+                SubscribeButtonText = "Subscribe";
+            }
+
+        }
+        private static string GetRandomString()
+        {
+            return new string(Enumerable.Repeat(chars, 21).Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+        void CloseWindow()
+        {
+            Application.Current.Shutdown();
+        }
+        void LoadNextPage()
+        {
+            pagecount++;
+            PageNumber = pagecount.ToString();
+            GetPostslist(next: NextPage);
+
+        }
+        void LoadPrevPage()
+        {
+            pagecount--;
+            if (pagecount < 2) pagecount = 1;
+            PageNumber = pagecount.ToString();
+            GetPostslist(prev: NextPage);
+        }
+        void HotCategory()
+        {
+            category = "hot";
+            pagecount = 1;
+            PageNumber = pagecount.ToString();
+            if (Cachedhot == null || Cachedhot.Count == 0)
+            {
+                GetPostslist();
+            }
+            else Posts.Clear(); Posts = Cachedhot;
+        }
+        void NewCategory()
+        {
+            category = "new";
+            pagecount = 1;
+            PageNumber = pagecount.ToString();
+            if (Cachednew == null || Cachednew.Count == 0)
+            {
+                GetPostslist();
+            }
+            else Posts.Clear(); Posts = Cachednew;
+        }
+        void TopCategory()
+        {
+            category = "top";
+            pagecount = 1;
+            PageNumber = pagecount.ToString();
+            if (Cachedtop == null || Cachedtop.Count == 0)
+            {
+                GetPostslist();
+            }
+            else Posts.Clear(); Posts = Cachedtop;
+        }
+        void MinimizeWindow()
+        {
+            CommentsIsOpen = false;
+            PostViewIsOpen = false;
+            PopupIsOpen = false;
+            Application.Current.MainWindow.WindowState = WindowState.Minimized;
+        }
+        void MaximizeWindow()
+        {
+            if (Application.Current.MainWindow.WindowState != WindowState.Maximized)
+                Application.Current.MainWindow.WindowState = WindowState.Maximized;
+            else Application.Current.MainWindow.WindowState = WindowState.Normal;
+        }
+
+
+    }
+    public class Comment : ViewModelBase
+    {
+        private string _commentbody;
+        private List<Comment> _replieslist;
+        public string CommentBody
+        {
+            get { return _commentbody; }
+            set { SetProperty(ref _commentbody, value); }
+        }
+        public List<Comment> RepliesList
+        {
+            get { return _replieslist; }
+            set { SetProperty(ref _replieslist, value); }
+        }
+        public Comment(string body, List<Comment> replies = null)
+        {
+            _commentbody = body;
+            _replieslist = replies;
+        }
+    }
+}

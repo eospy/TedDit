@@ -2,13 +2,9 @@
 {
     public class HomePageData
     {
-
-        public class Rootobject
-        {
-            public string kind { get; set; }
-            public Data data { get; set; }
-        }
-
+        public string kind { get; set; }
+        public Data data { get; set; }
+        
         public class Data
         {
             public string after { get; set; }

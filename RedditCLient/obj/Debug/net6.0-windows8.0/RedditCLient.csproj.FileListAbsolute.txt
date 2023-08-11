@@ -12,13 +12,11 @@ C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\D
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\SearchTheme.baml
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\UpvoteButtonTheme.baml
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\UserSubsStyleTheme.baml
-C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\MVVM\View\MainWindow.g.cs
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\App.g.cs
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\GeneratedInternalTypeHelper.g.cs
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient_MarkupCompile.cache
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient_MarkupCompile.lref
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\App.baml
-C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\MVVM\View\MainWindow.baml
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\Theme\ListViewTheme.baml
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient.g.resources
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient.GeneratedMSBuildEditorConfig.editorconfig
@@ -31,5 +29,5 @@ C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\D
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient.pdb
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\RedditCLient.genruntimeconfig.cache
 C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\ref\RedditCLient.dll
-C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\MVVM\View\VideoView.g.cs
-C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\MVVM\View\VideoView.baml
+C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\MVVM\View\MainWindow.g.cs
+C:\Users\Эмиль\OneDrive\Документы\GitHub\TedDit\RedditCLient\obj\Debug\net6.0-windows8.0\MVVM\View\MainWindow.baml
